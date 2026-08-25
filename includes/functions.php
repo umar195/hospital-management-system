@@ -366,16 +366,92 @@ function statusBadge($status)
         'Completed'        => 'success',
         'Delivered'        => 'success',
         'Scheduled'        => 'primary',
+        'Confirmed'        => 'info',
         'Arrived'          => 'info',
+        'Checked In'       => 'info',
+        'Waiting'          => 'warning',
+        'Called'           => 'info',
+        'In Consultation'  => 'primary',
         'Cancelled'        => 'danger',
         'No Show'          => 'dark',
+        'Missed'           => 'danger',
+        'Due Today'        => 'warning',
+        'Upcoming'         => 'info',
+        'Overdue'          => 'danger',
         'Paid'             => 'success',
         'Partial'          => 'warning',
         'Draft'            => 'secondary',
         'Final'            => 'success',
     ];
     $class = $map[$status] ?? 'secondary';
-    return '<span class="badge bg-' . $class . '">' . sanitize($status) . '</span>';
+    return '<span class="badge badge-status badge-' . strtolower(str_replace(' ', '-', $status)) . ' bg-' . $class . '">' . sanitize($status) . '</span>';
+}
+
+// ---------------------------------------------------------------------------
+// Consultation / queue / follow-up workflow helpers
+// ---------------------------------------------------------------------------
+
+/** Next queue token for a doctor for today (starts at 1 every day). */
+function nextTokenNumber($doctorId = null)
+{
+    if ($doctorId) {
+        return (int)fetchValue('SELECT COALESCE(MAX(token_number),0) + 1 FROM visits WHERE DATE(visit_date) = CURDATE() AND doctor_id = ?', [$doctorId], 1);
+    }
+    return (int)fetchValue('SELECT COALESCE(MAX(token_number),0) + 1 FROM visits WHERE DATE(visit_date) = CURDATE()', [], 1);
+}
+
+/**
+ * Create a consultation visit and place the patient in the doctor waiting queue.
+ * Returns the new visit id. Must be called inside an open transaction when
+ * combined with other inserts.
+ */
+function createQueueVisit(array $data)
+{
+    global $pdo;
+    $visitNumber = generateVisitNumber();
+    $token = nextTokenNumber($data['doctor_id'] ?? null);
+    $stmt = $pdo->prepare('INSERT INTO visits (visit_number, patient_id, visit_date, visit_type, doctor_id, appointment_id,
+                           follow_up_of_visit_id, token_number, queue_status, chief_complaint, symptoms, notes,
+                           consultation_fee, total_charges, payment_status, checked_in_at)
+                           VALUES (?,?,NOW(),?,?,?,?,?,\'Waiting\',?,?,?,?,?,\'Pending\',NOW())');
+    $fee = (float)($data['consultation_fee'] ?? 0);
+    $stmt->execute([
+        $visitNumber,
+        (int)$data['patient_id'],
+        $data['visit_type'] ?? 'Walk-In',
+        $data['doctor_id'] ?? null,
+        $data['appointment_id'] ?? null,
+        $data['follow_up_of_visit_id'] ?? null,
+        $token,
+        $data['chief_complaint'] ?? null,
+        $data['symptoms'] ?? null,
+        $data['notes'] ?? null,
+        $fee,
+        $fee,
+    ]);
+    return (int)$pdo->lastInsertId();
+}
+
+/** Effective display status of a follow-up ('Scheduled' becomes Due Today / Upcoming / Overdue). */
+function followUpDisplayStatus(array $followUp)
+{
+    if ($followUp['status'] !== 'Scheduled') {
+        return $followUp['status'];
+    }
+    $today = date('Y-m-d');
+    if ($followUp['follow_up_date'] === $today) {
+        return 'Due Today';
+    }
+    return $followUp['follow_up_date'] < $today ? 'Overdue' : 'Upcoming';
+}
+
+/** Small coloured queue token badge. */
+function tokenBadge($token)
+{
+    if ($token === null || $token === '') {
+        return '<span class="text-muted">-</span>';
+    }
+    return '<span class="token-badge">#' . (int)$token . '</span>';
 }
 
 // ---------------------------------------------------------------------------

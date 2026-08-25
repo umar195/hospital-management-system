@@ -7,10 +7,13 @@ $nav = [
     ['label' => 'Main', 'items' => [
         ['key' => 'dashboard', 'url' => '/dashboard.php', 'icon' => 'speedometer2', 'text' => 'Dashboard'],
         ['key' => 'walkin', 'url' => '/modules/walkin/index.php', 'icon' => 'lightning-charge', 'text' => 'Walk-In Registration'],
+        ['key' => 'queue', 'url' => '/modules/queue/index.php', 'icon' => 'people-fill', 'text' => 'Doctor Queue'],
     ]],
     ['label' => 'Patient Care', 'items' => [
         ['key' => 'patients', 'url' => '/modules/patients/index.php', 'icon' => 'people', 'text' => 'Patients'],
         ['key' => 'appointments', 'url' => '/modules/appointments/index.php', 'icon' => 'calendar-check', 'text' => 'Appointments'],
+        ['key' => 'consultations', 'url' => '/modules/consultations/index.php', 'icon' => 'clipboard2-heart', 'text' => 'Consultations'],
+        ['key' => 'followups', 'url' => '/modules/followups/index.php', 'icon' => 'arrow-repeat', 'text' => 'Follow-Ups'],
         ['key' => 'doctors', 'url' => '/modules/doctors/index.php', 'icon' => 'person-badge', 'text' => 'Doctors'],
         ['key' => 'prescriptions', 'url' => '/modules/prescriptions/index.php', 'icon' => 'capsule', 'text' => 'Prescriptions'],
     ]],
