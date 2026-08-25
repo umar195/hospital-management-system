@@ -28,7 +28,8 @@ if (!defined('DB_PASS')) { define('DB_PASS', ''); }
 if (!defined('DB_NAME')) { define('DB_NAME', 'hospital_db'); }
 
 define('APP_NAME', 'Hospital Management System');
-define('APP_VERSION', '1.0.0');
+define('APP_VERSION', '2.0.0');
+define('SCHEMA_VERSION', 2);
 
 // ---------------------------------------------------------------------------
 // Base URL (auto detected so the app works from any folder in htdocs)

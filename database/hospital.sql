@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS doctors (
   phone VARCHAR(20),
   email VARCHAR(100),
   license_number VARCHAR(50),
+  consultation_fee DECIMAL(10,2) DEFAULT 0,
   address TEXT,
   notes TEXT,
   is_active TINYINT(1) DEFAULT 1,
@@ -85,8 +86,12 @@ CREATE TABLE IF NOT EXISTS appointments (
   doctor_id INT,
   appointment_date DATE NOT NULL,
   appointment_time TIME NOT NULL,
+  duration_minutes INT DEFAULT 30,
+  appointment_type ENUM('New Consultation','Follow-Up','General Checkup','Lab Review','Emergency','Other') DEFAULT 'New Consultation',
   purpose VARCHAR(255),
-  status ENUM('Scheduled','Arrived','Completed','Cancelled','No Show') DEFAULT 'Scheduled',
+  referral_source VARCHAR(100),
+  visit_id INT NULL,
+  status ENUM('Scheduled','Confirmed','Checked In','Waiting','In Consultation','Completed','Cancelled','No Show') DEFAULT 'Scheduled',
   notes TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_appt_date (appointment_date),
@@ -104,14 +109,58 @@ CREATE TABLE IF NOT EXISTS visits (
   visit_date DATETIME NOT NULL,
   visit_type ENUM('Walk-In','Appointment','Emergency','Follow-Up') DEFAULT 'Walk-In',
   doctor_id INT,
+  appointment_id INT NULL,
+  follow_up_of_visit_id INT NULL,
+  token_number INT NULL,
+  queue_status ENUM('Waiting','Called','In Consultation','Completed','Cancelled','No Show') NULL,
   symptoms TEXT,
+  chief_complaint TEXT,
+  temperature VARCHAR(10),
+  blood_pressure VARCHAR(15),
+  pulse VARCHAR(10),
+  respiratory_rate VARCHAR(10),
+  oxygen_saturation VARCHAR(10),
+  weight VARCHAR(10),
+  height VARCHAR(10),
   diagnosis TEXT,
+  examination_notes TEXT,
+  doctor_notes TEXT,
+  consultation_fee DECIMAL(10,2) DEFAULT 0,
   notes TEXT,
   total_charges DECIMAL(10,2) DEFAULT 0,
   payment_status ENUM('Pending','Partial','Paid') DEFAULT 'Pending',
+  checked_in_at DATETIME NULL,
+  consultation_started_at DATETIME NULL,
+  consultation_completed_at DATETIME NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
   FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -------------------------------------------------------------
+-- Follow ups (doctor ordered reviews linked to the original visit)
+-- -------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS follow_ups (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  patient_id INT NOT NULL,
+  doctor_id INT NULL,
+  visit_id INT NULL,
+  new_visit_id INT NULL,
+  follow_up_date DATE NOT NULL,
+  follow_up_time TIME NULL,
+  follow_up_type ENUM('Routine Follow-Up','Test Result Review','Medication Review','Post-Treatment Review','Chronic Care Follow-Up','Other') DEFAULT 'Routine Follow-Up',
+  reason VARCHAR(255) NULL,
+  notes TEXT NULL,
+  status ENUM('Scheduled','Completed','Missed','Cancelled') DEFAULT 'Scheduled',
+  reschedule_history TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_followup_date (follow_up_date),
+  INDEX idx_followup_status (status),
+  FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+  FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE SET NULL,
+  FOREIGN KEY (visit_id) REFERENCES visits(id) ON DELETE SET NULL,
+  FOREIGN KEY (new_visit_id) REFERENCES visits(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------
@@ -173,6 +222,7 @@ CREATE TABLE IF NOT EXISTS test_orders (
   order_number VARCHAR(20) UNIQUE NOT NULL,
   patient_id INT NOT NULL,
   visit_id INT,
+  doctor_id INT NULL,
   order_date DATETIME NOT NULL,
   referring_doctor VARCHAR(100),
   total_amount DECIMAL(10,2) DEFAULT 0,
@@ -313,7 +363,9 @@ CREATE TABLE IF NOT EXISTS prescriptions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   patient_id INT NOT NULL,
   visit_id INT,
+  doctor_id INT NULL,
   prescription_date DATE NOT NULL,
+  diagnosis TEXT,
   notes TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
@@ -329,6 +381,7 @@ CREATE TABLE IF NOT EXISTS prescription_items (
   dosage VARCHAR(50),
   frequency VARCHAR(50),
   duration VARCHAR(50),
+  route VARCHAR(50),
   instructions TEXT,
   FOREIGN KEY (prescription_id) REFERENCES prescriptions(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -426,7 +479,9 @@ INSERT INTO settings (setting_key, setting_value) VALUES
 ('report_disclaimer', 'Laboratory results should always be correlated clinically. In case of any unexpected result please contact the laboratory immediately.'),
 ('authorized_by', 'Dr. Ayesha Khan (MBBS, FCPS Pathology)'),
 ('invoice_footer', 'Please keep this receipt for collecting your reports.'),
-('default_discount', '0')
+('default_discount', '0'),
+('default_consultation_fee', '1500'),
+('schema_version', '2')
 ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value);
 
 -- Test categories
