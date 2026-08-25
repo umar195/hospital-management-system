@@ -19,6 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $refDoctor = post('referring_doctor');
     $notes     = post('notes');
     $orderDate = post('order_date') ?: date('Y-m-d H:i:s');
+    $visitType = post('visit_type', 'Walk-In');
+    if (!in_array($visitType, ['Walk-In', 'Appointment', 'Emergency', 'Follow-Up'], true)) {
+        $visitType = 'Walk-In';
+    }
 
     if (!in_array($method, ['Cash', 'Card', 'Bank Transfer', 'Other'], true)) {
         $method = 'Cash';
@@ -54,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $visitNumber = generateVisitNumber();
             $pdo->prepare('INSERT INTO visits (visit_number, patient_id, visit_date, visit_type, symptoms, notes, total_charges, payment_status)
                            VALUES (?,?,?,?,NULL,?,?,?)')
-                ->execute([$visitNumber, $patientId, $orderDate, 'Walk-In', $notes ?: null, $net, $payStatus]);
+                ->execute([$visitNumber, $patientId, $orderDate, $visitType, $notes ?: null, $net, $payStatus]);
             $visitId = (int)$pdo->lastInsertId();
 
             $orderNumber = generateOrderNumber();
@@ -215,6 +219,14 @@ require_once INC_PATH . '/header.php';
                     <div class="col-12">
                         <label class="form-label">Order date &amp; time</label>
                         <input type="datetime-local" name="order_date" class="form-control" value="<?= date('Y-m-d\TH:i') ?>">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Visit type</label>
+                        <select name="visit_type" class="form-select">
+                            <?php foreach (['Walk-In', 'Appointment', 'Emergency', 'Follow-Up'] as $vt): ?>
+                                <option value="<?= $vt ?>" <?= post('visit_type', 'Walk-In') === $vt ? 'selected' : '' ?>><?= $vt ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="col-12">
                         <label class="form-label">Referring doctor</label>

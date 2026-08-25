@@ -12,10 +12,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $txId = (int)post('id');
         $tx = fetchOne('SELECT * FROM inventory_transactions WHERE id = ?', [$txId]);
         if ($tx) {
+            $current = (int)fetchValue('SELECT quantity FROM inventory_items WHERE id = ?', [$tx['item_id']]);
+            $restored = $current - (int)$tx['quantity'];
+            if ($restored < 0) {
+                flash('danger', 'This movement cannot be reversed: only ' . $current .
+                    ' unit(s) are in stock but ' . abs((int)$tx['quantity']) . ' would have to be removed.');
+                redirect(BASE_URL . '/modules/inventory/transactions.php' . ($itemId ? '?item_id=' . $itemId : ''));
+            }
             try {
                 $pdo->beginTransaction();
-                $pdo->prepare('UPDATE inventory_items SET quantity = GREATEST(quantity - ?, 0) WHERE id = ?')
-                    ->execute([(int)$tx['quantity'], $tx['item_id']]);
+                $pdo->prepare('UPDATE inventory_items SET quantity = ? WHERE id = ?')
+                    ->execute([$restored, $tx['item_id']]);
                 $pdo->prepare('DELETE FROM inventory_transactions WHERE id = ?')->execute([$txId]);
                 $pdo->commit();
                 logActivity('Stock movement reversed', 'Transaction #' . $txId, 'inventory_transactions', $txId);
@@ -47,15 +54,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         flash('danger', 'Quantity must not be zero.');
     } else {
         $delta = $type === 'Stock Out' ? -abs($qty) : ($type === 'Stock In' ? abs($qty) : $qty);
-        if ($type === 'Stock Out' && abs($delta) > (int)$target['quantity']) {
+        $newQuantity = (int)$target['quantity'] + $delta;
+        if ($newQuantity < 0) {
             flash('danger', 'Only ' . (int)$target['quantity'] . ' unit(s) are in stock.');
         } else {
             try {
                 $pdo->beginTransaction();
                 $pdo->prepare('INSERT INTO inventory_transactions (item_id, type, quantity, notes, transaction_date) VALUES (?,?,?,?,?)')
                     ->execute([$targetId, $type, $delta, post('notes') ?: null, $date]);
-                $pdo->prepare('UPDATE inventory_items SET quantity = GREATEST(quantity + ?, 0) WHERE id = ?')
-                    ->execute([$delta, $targetId]);
+                $pdo->prepare('UPDATE inventory_items SET quantity = ? WHERE id = ?')
+                    ->execute([$newQuantity, $targetId]);
                 $pdo->commit();
                 logActivity('Stock movement', $type . ' ' . $delta . ' × ' . $target['name'], 'inventory_items', $targetId);
                 flash('success', $type . ' recorded for ' . sanitize($target['name']) . '.');

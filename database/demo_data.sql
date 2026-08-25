@@ -62,16 +62,16 @@ INSERT INTO inventory_items (id, item_code, name, category, supplier_id, purchas
 
 INSERT INTO inventory_transactions (item_id, type, quantity, notes, transaction_date) VALUES
 (1, 'Stock In', 50, 'Opening stock', DATE_SUB(NOW(), INTERVAL 30 DAY)),
-(1, 'Stock Out', 8, 'Issued to phlebotomy', DATE_SUB(NOW(), INTERVAL 10 DAY)),
+(1, 'Stock Out', -8, 'Issued to phlebotomy', DATE_SUB(NOW(), INTERVAL 10 DAY)),
 (2, 'Stock In', 20, 'Opening stock', DATE_SUB(NOW(), INTERVAL 30 DAY)),
-(2, 'Stock Out', 12, 'Issued to OPD', DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(2, 'Stock Out', -12, 'Issued to OPD', DATE_SUB(NOW(), INTERVAL 5 DAY)),
 (3, 'Stock In', 12, 'Monthly reagent purchase', DATE_SUB(NOW(), INTERVAL 20 DAY)),
 (4, 'Stock In', 10, 'Opening stock', DATE_SUB(NOW(), INTERVAL 40 DAY)),
-(4, 'Stock Out', 5, 'Consumed in lab', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(4, 'Stock Out', -5, 'Consumed in lab', DATE_SUB(NOW(), INTERVAL 3 DAY)),
 (5, 'Stock In', 60, 'Bulk purchase', DATE_SUB(NOW(), INTERVAL 15 DAY)),
 (6, 'Stock In', 24, 'Pharmacy stock', DATE_SUB(NOW(), INTERVAL 12 DAY)),
 (7, 'Stock In', 10, 'Opening stock', DATE_SUB(NOW(), INTERVAL 25 DAY)),
-(7, 'Stock Out', 7, 'Sampling room', DATE_SUB(NOW(), INTERVAL 2 DAY));
+(7, 'Stock Out', -7, 'Sampling room', DATE_SUB(NOW(), INTERVAL 2 DAY));
 
 -- -------------------------------------------------------------
 -- Appointments
