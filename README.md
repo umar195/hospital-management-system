@@ -109,6 +109,32 @@ php -S localhost:8080
 
 ---
 
+## HTML preview (no PHP, no database)
+
+`preview.html` in the project root is a **single self-contained file** that mirrors
+every screen of the application so the UI can be reviewed without installing PHP or
+MySQL. Just double-click the file (or open it in any browser) — it needs no server.
+
+* Sign in with the pre-filled demo credentials `admin` / `admin123` (nothing is
+  validated — the button simply opens the dashboard).
+* Navigation uses hash routes, e.g. `#/patients`, `#/order-results?id=1`,
+  `#/walkin?receipt=1`. **All Screens** in the sidebar (`#/screens`) lists every
+  preview screen with its link.
+* Covered modules: dashboard, walk-in registration wizard, patients, appointments,
+  doctors, prescriptions, test orders, result entry, reports, tests/parameters/
+  categories, invoices, payments, expenses, inventory, stock movements, suppliers,
+  analytics charts, backup and settings — including the printable report, invoice,
+  prescription and receipt sheets (use the Print buttons).
+* Interactive parts work client-side: order/billing calculators, automatic
+  High/Low/Normal result flags, table search boxes, dynamic parameter and medicine
+  rows and the four-step walk-in wizard.
+* Everything runs on in-memory demo data. Saving, deleting, filtering and
+  exporting only show a toast — no data is stored and the PHP application is not
+  affected. Chart.js and Bootstrap are loaded from the CDN, so charts and icons
+  need an internet connection.
+
+---
+
 ## Full offline mode (no CDN)
 
 The UI uses Bootstrap 5, Bootstrap Icons and Chart.js. By default the pages load
@@ -168,6 +194,7 @@ hospital-management-system/
 ├── login.php  logout.php     # authentication
 ├── dashboard.php             # main dashboard
 ├── install.php               # installation wizard
+├── preview.html              # standalone HTML preview of every screen (demo data)
 ├── config/
 │   ├── config.php            # paths, DB connection (PDO), BASE_URL
 │   ├── db_config.php         # created by the installer (not in git)
