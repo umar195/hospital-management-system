@@ -32,8 +32,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = post('action', 'general');
 
     if ($action === 'general') {
+        $required = [
+            'currency_symbol' => 'Rs.', 'date_format' => 'd M Y', 'time_format' => 'h:i A',
+            'patient_prefix' => 'PAT', 'invoice_prefix' => 'INV', 'order_prefix' => 'ORD', 'report_prefix' => 'RPT',
+        ];
         foreach ($fields as $key => $meta) {
-            setSetting($key, trim((string)post($key)));
+            if (!array_key_exists($key, $_POST)) {
+                continue;
+            }
+            $value = trim((string)post($key));
+            if ($value === '' && isset($required[$key])) {
+                $value = $required[$key];
+            }
+            setSetting($key, $value);
         }
 
         if (!empty($_FILES['logo']['tmp_name']) && is_uploaded_file($_FILES['logo']['tmp_name'])) {
