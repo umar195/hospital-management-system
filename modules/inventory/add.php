@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
-            $errors[] = 'Could not save the item: ' . $e->getMessage();
+            $errors[] = friendlyError($e, 'Could not save the item. Please try again.');
         }
     }
 }

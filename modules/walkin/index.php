@@ -152,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
-            $errors[] = 'Could not complete the walk-in: ' . $e->getMessage();
+            $errors[] = friendlyError($e, 'Could not complete the walk-in. Please try again.');
         }
     }
 }

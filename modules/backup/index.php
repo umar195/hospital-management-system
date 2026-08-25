@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             logActivity('Backup created', basename($file), 'backups', null);
             flash('success', 'Backup created: ' . basename($file) . ' (' . number_format(filesize($file) / 1024, 1) . ' KB)');
         } catch (Throwable $e) {
-            flash('danger', 'Backup failed: ' . $e->getMessage());
+            flash('danger', friendlyError($e, 'Backup failed. Please check the server error log.'));
         }
     } elseif ($action === 'delete') {
         $name = basename((string)post('file'));
@@ -202,7 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash('success', 'Database restored from ' . sanitize($source) . '. ' . $count .
                 ' statements executed. A safety backup was saved as ' . basename($safety) . '.');
         } catch (Throwable $e) {
-            flash('danger', 'Restore failed: ' . $e->getMessage());
+            flash('danger', friendlyError($e, 'Restore failed. Please check the server error log.'));
         }
     }
     redirect(BASE_URL . '/modules/backup/index.php');

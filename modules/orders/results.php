@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
-        flash('danger', 'Could not save results: ' . $e->getMessage());
+        flash('danger', friendlyError($e, 'Could not save the results. Please try again.'));
     }
 
     if (post('after') === 'report') {

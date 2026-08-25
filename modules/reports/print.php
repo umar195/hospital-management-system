@@ -165,7 +165,7 @@ $logo = hospitalLogoUrl();
         </div>
         <div class="col-6 text-end">
             <div style="border-top:1px solid #333; display:inline-block; padding-top:.35rem; min-width:220px">
-                <strong><?= sanitize($report['authorized_by'] ?: getSetting('report_authorized_by', 'Authorized Signatory')) ?></strong><br>
+                <strong><?= sanitize($report['authorized_by'] ?: getSetting('authorized_by', 'Authorized Signatory')) ?></strong><br>
                 <small class="text-muted">Authorized signatory</small>
             </div>
         </div>

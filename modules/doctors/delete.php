@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         logActivity('Doctor deleted', $doctor['name'], 'doctors', $id);
         flash('success', 'Doctor deleted. Linked appointments and visits were kept without a doctor.');
     } catch (PDOException $e) {
-        flash('danger', 'Could not delete the doctor: ' . $e->getMessage());
+        flash('danger', friendlyError($e, 'Could not delete the doctor. Please try again.'));
     }
     redirect(BASE_URL . '/modules/doctors/index.php');
 }

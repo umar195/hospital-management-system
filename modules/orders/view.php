@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $number = generateReportNumber();
         $pdo->prepare('INSERT INTO reports (report_number, order_id, patient_id, generated_at, authorized_by, remarks, status)
                        VALUES (?,?,?,NOW(),?,?,?)')
-            ->execute([$number, $id, $order['patient_id'], getSetting('report_authorized_by', ''), null, $pending ? 'Draft' : 'Final']);
+            ->execute([$number, $id, $order['patient_id'], getSetting('authorized_by', ''), null, $pending ? 'Draft' : 'Final']);
         $reportId = (int)$pdo->lastInsertId();
         logActivity('Report generated', $number . ' for ' . $order['order_number'], 'reports', $reportId);
         flash('success', 'Report ' . $number . ' generated.');

@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash('success', 'Patient record updated successfully.');
             redirect(BASE_URL . '/modules/patients/view.php?id=' . $id);
         } catch (PDOException $e) {
-            $errors[] = 'Could not update the patient: ' . $e->getMessage();
+            $errors[] = friendlyError($e, 'Could not update the patient. Please try again.');
         }
     }
 }

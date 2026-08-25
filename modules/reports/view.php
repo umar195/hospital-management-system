@@ -115,7 +115,7 @@ require_once INC_PATH . '/header.php';
                 <div class="mb-3">
                     <label class="form-label">Authorized by</label>
                     <input type="text" name="authorized_by" class="form-control"
-                           value="<?= sanitize($report['authorized_by'] ?: getSetting('report_authorized_by', '')) ?>">
+                           value="<?= sanitize($report['authorized_by'] ?: getSetting('authorized_by', '')) ?>">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Remarks / interpretation</label>

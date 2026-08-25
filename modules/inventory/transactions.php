@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($pdo->inTransaction()) {
                     $pdo->rollBack();
                 }
-                flash('danger', 'Could not reverse the movement: ' . $e->getMessage());
+                flash('danger', friendlyError($e, 'Could not reverse the movement. Please try again.'));
             }
         }
         redirect(BASE_URL . '/modules/inventory/transactions.php' . ($itemId ? '?item_id=' . $itemId : ''));
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($pdo->inTransaction()) {
                     $pdo->rollBack();
                 }
-                flash('danger', 'Could not record the movement: ' . $e->getMessage());
+                flash('danger', friendlyError($e, 'Could not record the movement. Please try again.'));
             }
         }
     }

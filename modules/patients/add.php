@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             redirect(BASE_URL . '/modules/patients/view.php?id=' . $id);
         } catch (PDOException $e) {
-            $errors[] = 'Could not save the patient: ' . $e->getMessage();
+            $errors[] = friendlyError($e, 'Could not save the patient. Please try again.');
         }
     }
 }

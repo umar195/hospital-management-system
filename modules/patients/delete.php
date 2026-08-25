@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         logActivity('Patient deleted', $patient['patient_id'] . ' - ' . $patient['full_name'], 'patients', $id);
         flash('success', 'Patient ' . $patient['patient_id'] . ' and all related records were deleted.');
     } catch (PDOException $e) {
-        flash('danger', 'Could not delete the patient: ' . $e->getMessage());
+        flash('danger', friendlyError($e, 'Could not delete the patient. Please try again.'));
     }
     redirect(BASE_URL . '/modules/patients/index.php');
 }

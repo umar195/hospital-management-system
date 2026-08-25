@@ -533,3 +533,21 @@ function asset_url($localRelativePath, $cdnUrl)
     }
     return $cdnUrl;
 }
+
+/**
+ * Log an exception server side and return a message that is safe to show to the user.
+ * Validation problems (RuntimeException / InvalidArgumentException thrown by the app) are shown
+ * as-is; database and runtime errors are replaced by a generic notice so that no internal
+ * details leak into the browser.
+ */
+function friendlyError($e, $fallback = 'An internal error occurred. Please try again or contact the administrator.')
+{
+    error_log('[HMS] ' . get_class($e) . ': ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+    if ($e instanceof PDOException || $e instanceof Error) {
+        return $fallback;
+    }
+    if ($e instanceof RuntimeException || $e instanceof InvalidArgumentException) {
+        return $e->getMessage();
+    }
+    return $fallback;
+}

@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
-            $errors[] = 'Could not create the order: ' . $e->getMessage();
+            $errors[] = friendlyError($e, 'Could not create the order. Please try again.');
         }
     }
 }
