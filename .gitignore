@@ -1,0 +1,12 @@
+# Ignore locally generated files
+config/db_config.php
+uploads/backups/*.sql
+uploads/logos/*
+!uploads/logos/.gitkeep
+uploads/reports/*
+!uploads/reports/.gitkeep
+server.log
+cookie.txt
+.smoke_cookie
+smoke.sh
+*.log
