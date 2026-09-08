@@ -6,6 +6,41 @@ plain **PHP 7.4+ / MySQL** (PDO, no framework, no Composer). Drop the folder int
 
 ---
 
+## WordPress Plugin Update Checker / Health Tools
+
+A **separate WordPress companion plugin** is available in
+[`wordpress/plugin-update-health-tools/`](wordpress/plugin-update-health-tools/).
+It does not convert the hospital application into WordPress or access its database.
+
+1. Download [`plugin-update-health-tools.zip`](wordpress/plugin-update-health-tools.zip)
+   using GitHub's **Download raw file** button.
+2. In WordPress, choose **Plugins → Add New Plugin → Upload Plugin**, upload that ZIP,
+   install, and activate. Do not upload the full hospital repository ZIP.
+3. Open **Tools → Plugin Health Tools** to review cached plugin versions/updates
+   and request a fresh update check.
+4. Install and activate the optional **WP Rollback**, **Health Check & Troubleshooting**,
+   and **Query Monitor** tools using the dashboard's WordPress-managed actions.
+
+Requires WordPress **6.5+** and PHP **7.4+**; optional tools have their own requirements.
+On multisite, network activate and use **Network Admin → Plugins → Plugin Health Tools**.
+The tools are not bundled: their native screens perform rollback, conflict isolation,
+and diagnostics. Back up files **and** the database before updating or rolling back;
+old releases can be vulnerable and file rollback cannot undo database migrations.
+
+See the [plugin readme](wordpress/plugin-update-health-tools/readme.txt) for permissions,
+privacy, limitations, and the troubleshooting workflow. WordPress.org access is
+required for fresh update checks and tool downloads.
+
+To rebuild the installable archive from the repository root:
+
+```bash
+cd wordpress
+zip -r -X plugin-update-health-tools.zip plugin-update-health-tools \
+  -i '*.php' '*.txt'
+```
+
+---
+
 ## Features
 
 | Module | What you can do |
