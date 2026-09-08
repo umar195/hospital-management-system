@@ -51,6 +51,13 @@ final class PUHT_Dashboard {
 		}
 	}
 
+	private static function has_update_results( $updates ) {
+		return is_object( $updates )
+			&& isset( $updates->response, $updates->no_update )
+			&& is_array( $updates->response )
+			&& is_array( $updates->no_update );
+	}
+
 	public static function check_updates() {
 		self::authorize();
 		if ( ! current_user_can( 'update_plugins' ) ) {
@@ -67,7 +74,7 @@ final class PUHT_Dashboard {
 		delete_site_transient( 'update_plugins' );
 		wp_update_plugins();
 		$updates = get_site_transient( 'update_plugins' );
-		$success = is_object( $updates ) && isset( $updates->checked ) && is_array( $updates->checked );
+		$success = self::has_update_results( $updates );
 
 		// Core records an attempt timestamp even on failure; retain the last known results.
 		if ( ! $success && is_object( $previous ) ) {
@@ -154,7 +161,7 @@ final class PUHT_Dashboard {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		$installed = get_plugins();
 		$updates   = get_site_transient( 'update_plugins' );
-		$checked   = is_object( $updates ) && isset( $updates->checked ) && is_array( $updates->checked );
+		$checked   = self::has_update_results( $updates );
 		$available = is_object( $updates ) && isset( $updates->response ) && is_array( $updates->response )
 			? array_intersect_key( $updates->response, $installed )
 			: array();
@@ -232,7 +239,10 @@ final class PUHT_Dashboard {
 							if ( isset( $available[ $file ]->new_version ) ) {
 								echo esc_html( $available[ $file ]->new_version );
 							} else {
-								echo $checked && isset( $updates->checked[ $file ] ) && (string) $updates->checked[ $file ] === (string) $plugin['Version']
+								$version_checked = $checked && isset( $updates->checked[ $file ] ) && (string) $updates->checked[ $file ] === (string) $plugin['Version'];
+								// WordPress 6.5–6.7 may omit checked after a successful refresh.
+								$no_update = $checked && isset( $updates->no_update[ $file ]->new_version ) && (string) $updates->no_update[ $file ]->new_version === (string) $plugin['Version'];
+								echo $version_checked || $no_update
 									? esc_html__( 'No update reported', 'plugin-update-health-tools' )
 									: esc_html__( 'Not checked', 'plugin-update-health-tools' );
 							}
